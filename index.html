@@ -138,6 +138,7 @@
             padding: 12px 16px;
             border-radius: 18px;
             line-height: 1.5;
+            white-space: pre-wrap;
         }
 
         .message.user .message-content {
@@ -191,6 +192,12 @@
 
         #sendBtn:active {
             transform: scale(0.95);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
         }
 
         .quick-actions {
@@ -293,6 +300,10 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
+        .typing-indicator.active {
+            display: block;
+        }
+
         .typing-indicator span {
             display: inline-block;
             width: 8px;
@@ -319,16 +330,40 @@
                 transform: translateY(-10px);
             }
         }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 20px;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .status-badge.connected {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: rgba(76, 175, 80, 0.6);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 AI Secretary</h1>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h1>🤖 AI Secretary</h1>
+                <span class="status-badge connected">Powered by Claude</span>
+            </div>
             <div class="header-controls">
                 <button class="mode-toggle" id="modeToggle">💼 Professional Mode</button>
                 <button class="feature-btn" id="tasksBtn">📋 Tasks</button>
-                <button class="feature-btn" id="calendarBtn">📅 Calendar</button>
             </div>
         </div>
 
@@ -344,9 +379,7 @@
         <div class="chat-area" id="chatArea">
             <div class="message assistant">
                 <div class="avatar">🤖</div>
-                <div class="message-content">
-                    Hey there! I'm your AI secretary, ready to help with whatever you need. Whether it's scheduling meetings, drafting emails, researching topics, or just having a conversation - I've got you covered. What can I help you with today?
-                </div>
+                <div class="message-content">Hey there! I'm your AI secretary powered by Claude. I can help with scheduling meetings, drafting emails, research, brainstorming, data analysis, and setting reminders. What can I help you with today?</div>
             </div>
         </div>
 
@@ -362,8 +395,8 @@
             <h2>Tasks & Reminders</h2>
             <div id="tasksList">
                 <div class="task-item">
-                    <strong>Sample Task</strong><br>
-                    <small>Click quick actions to add tasks</small>
+                    <strong>No tasks yet</strong><br>
+                    <small>Tasks will appear here</small>
                 </div>
             </div>
         </div>
@@ -383,6 +416,7 @@
         let mode = 'professional';
         let conversationHistory = [];
         let tasks = [];
+        let systemPrompt = `You are a helpful AI secretary assistant. You help with scheduling meetings, drafting emails, research, brainstorming, data analysis, and setting reminders. You blend professional and casual tones naturally. Be concise but friendly and helpful.`;
 
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
@@ -402,7 +436,10 @@
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            conversationHistory.push({ role: isUser ? 'user' : 'assistant', content });
+            conversationHistory.push({ 
+                role: isUser ? 'user' : 'assistant', 
+                content: content 
+            });
         }
 
         function showTypingIndicator() {
@@ -415,8 +452,7 @@
             avatar.textContent = '🤖';
             
             const indicator = document.createElement('div');
-            indicator.className = 'typing-indicator';
-            indicator.style.display = 'block';
+            indicator.className = 'typing-indicator active';
             indicator.innerHTML = '<span></span><span></span><span></span>';
             
             typing.appendChild(avatar);
@@ -430,41 +466,68 @@
             if (typing) typing.remove();
         }
 
-        function getAIResponse(userMessage) {
-            showTypingIndicator();
-            
-            setTimeout(() => {
-                removeTypingIndicator();
-                
-                const lowerMsg = userMessage.toLowerCase();
-                let response = '';
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            chatArea.appendChild(errorDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
 
-                if (lowerMsg.includes('schedule') || lowerMsg.includes('meeting') || lowerMsg.includes('calendar')) {
-                    response = `I can help you schedule that! What time works best for you? I'll need the date, time, duration, and who should attend. I'll add it to your calendar and send out invites.`;
-                    addTask('Schedule meeting: ' + userMessage);
-                } else if (lowerMsg.includes('email') || lowerMsg.includes('draft') || lowerMsg.includes('write')) {
-                    response = `Sure thing! I'll help you draft that email. Who's the recipient, what's the subject, and what's the main message you want to convey? I'll make it sound professional (or casual, your call).`;
-                } else if (lowerMsg.includes('research') || lowerMsg.includes('find') || lowerMsg.includes('look up')) {
-                    response = `I'm on it! I'll research that topic for you and compile the key information, sources, and insights. What specific aspects are you most interested in?`;
-                } else if (lowerMsg.includes('brainstorm') || lowerMsg.includes('ideas') || lowerMsg.includes('creative')) {
-                    response = `Love it! Let's get creative. Give me more context about what you're working on, and I'll throw out some ideas. No bad ideas in brainstorming, right?`;
-                } else if (lowerMsg.includes('analyze') || lowerMsg.includes('data') || lowerMsg.includes('report')) {
-                    response = `Perfect! I can analyze that data for you. Share the data or let me know what metrics you're looking at, and I'll break down the insights, trends, and recommendations.`;
-                } else if (lowerMsg.includes('remind') || lowerMsg.includes('reminder') || lowerMsg.includes('alert')) {
-                    response = `Got it! I'll set a reminder for you. When do you want to be reminded, and what should I remind you about?`;
-                    addTask('Reminder: ' + userMessage);
-                } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
-                    response = mode === 'professional' 
-                        ? `Hello! How can I assist you today? I'm here to help with your work tasks and anything else you need.`
-                        : `Hey! What's up? Ready to tackle some work or just chat? I'm here for whatever you need. 😊`;
-                } else {
-                    response = mode === 'professional'
-                        ? `I understand. Let me help you with that. Could you provide more details so I can assist you better?`
-                        : `Interesting! Tell me more about that. I'm all ears and ready to help however I can. What's on your mind?`;
+        async function getAIResponse(userMessage) {
+            showTypingIndicator();
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+
+            try {
+                // Prepare messages for Claude API
+                const messages = conversationHistory
+                    .slice(-10) // Keep last 10 messages for context
+                    .filter(msg => msg.role === 'user' || msg.role === 'assistant')
+                    .map(msg => ({
+                        role: msg.role,
+                        content: msg.content
+                    }));
+
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: messages,
+                        systemPrompt: systemPrompt
+                    })
+                });
+
+                const data = await response.json();
+
+                removeTypingIndicator();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to get response');
                 }
 
-                addMessage(response);
-            }, 1500);
+                addMessage(data.content, false);
+
+                // Auto-add tasks for certain requests
+                const lowerMsg = userMessage.toLowerCase();
+                if (lowerMsg.includes('schedule') || lowerMsg.includes('meeting') || 
+                    lowerMsg.includes('remind') || lowerMsg.includes('task')) {
+                    addTask(userMessage);
+                }
+
+            } catch (error) {
+                removeTypingIndicator();
+                console.error('Error:', error);
+                showError('Failed to get AI response. Please make sure your API key is configured in Netlify.');
+                addMessage("I'm having trouble connecting right now. Please check that your API key is set up correctly in Netlify environment variables.", false);
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
         }
 
         function addTask(taskName) {
@@ -488,7 +551,7 @@
 
         sendBtn.addEventListener('click', () => {
             const message = messageInput.value.trim();
-            if (message) {
+            if (message && !sendBtn.disabled) {
                 addMessage(message, true);
                 messageInput.value = '';
                 getAIResponse(message);
@@ -496,7 +559,7 @@
         });
 
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
                 sendBtn.click();
             }
         });
@@ -505,10 +568,14 @@
             mode = mode === 'professional' ? 'casual' : 'professional';
             modeToggle.textContent = mode === 'professional' ? '💼 Professional Mode' : '😎 Casual Mode';
             
+            systemPrompt = mode === 'professional' 
+                ? `You are a professional AI secretary assistant. Keep responses business-focused and formal but still warm. Help with scheduling meetings, drafting emails, research, brainstorming, data analysis, and setting reminders.`
+                : `You are a friendly, casual AI secretary assistant. Keep it relaxed and natural while being helpful. Help with scheduling, emails, research, brainstorming, analysis, and reminders. Be conversational and fun!`;
+            
             const modeMsg = mode === 'professional'
-                ? `Switched to professional mode. I'll keep things business-focused and formal.`
-                : `Switched to casual mode. Let's keep it relaxed and natural!`;
-            addMessage(modeMsg);
+                ? `Switched to professional mode. I'll keep things business-focused.`
+                : `Switched to casual mode. Let's keep it fun and relaxed!`;
+            addMessage(modeMsg, false);
         });
 
         quickActions.forEach(btn => {
@@ -523,7 +590,7 @@
                     reminder: "Set a reminder for me"
                 };
                 messageInput.value = prompts[action];
-                sendBtn.click();
+                messageInput.focus();
             });
         });
 
@@ -535,9 +602,8 @@
             sidebar.classList.remove('active');
         });
 
-        document.getElementById('calendarBtn').addEventListener('click', () => {
-            addMessage("Calendar feature coming soon! For now, I can help you schedule meetings and set reminders through our chat.");
-        });
+        // Focus input on load
+        messageInput.focus();
     </script>
 </body>
 </html>
