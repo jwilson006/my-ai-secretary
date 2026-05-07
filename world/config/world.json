@@ -1,0 +1,36 @@
+{
+  "name": "Cedarbrook",
+  "state": "Georgia",
+  "description": "A quiet fictional American suburb south of Atlanta. Tree-lined streets, a close-knit community, one church that anchors the social life, and a growing local economy.",
+  "timezone": "America/New_York",
+  "tick_interval_minutes": 5,
+  "in_world_hours_per_tick": 1,
+  "current_day": 1,
+  "current_hour": 7,
+  "locations": {
+    "maroni_house": {
+      "label": "Maroni Residence",
+      "address": "14 Willow Creek Lane",
+      "description": "A tidy two-bedroom home with a small front porch. Immaculately kept inside by Lily. Warm, simple, lived-in.",
+      "rooms": ["living_room", "kitchen", "dining_room", "master_bedroom", "guest_bedroom", "bathroom", "attic", "basement"]
+    },
+    "callahan_house": {
+      "label": "Callahan Residence",
+      "address": "22 Willow Creek Lane",
+      "description": "A larger home on the same street. Always has someone coming or going. Feels like a second church annex most days.",
+      "rooms": ["living_room", "kitchen", "dining_room", "master_bedroom", "guest_bedroom", "study", "bathroom"]
+    },
+    "cornerstone_church": {
+      "label": "Cornerstone Community Church",
+      "address": "5 Cedarbrook Boulevard",
+      "description": "A mid-sized non-denominational church. Warm wood interiors, stained glass, a small food pantry in the back.",
+      "rooms": ["sanctuary", "pastor_office", "counseling_room", "fellowship_hall", "food_pantry"]
+    },
+    "maroni_fashion_hq": {
+      "label": "Maroni Fashion Group HQ",
+      "address": "110 Commerce Drive, Suite 200",
+      "description": "A modern open-plan office space. Erin was the first tenant in the building. Design boards everywhere, fabric swatches on every surface.",
+      "rooms": ["open_office", "conference_room", "erins_office", "sample_room", "break_room"]
+    }
+  }
+}
