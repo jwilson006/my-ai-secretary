@@ -218,9 +218,6 @@ def rig_character(meshes, character_name):
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
     # Get character dimensions
-    bbox = [mesh_obj.matrix_world @ bpy.data.objects[mesh_obj.name].bound_box[i]
-            for i in range(8)]
-    # Simpler: use dimensions
     dims = mesh_obj.dimensions
     height = dims.z
     cx = mesh_obj.location.x
