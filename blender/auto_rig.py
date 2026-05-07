@@ -36,7 +36,7 @@ CHARACTER_CONFIGS = [
     },
     {
         "name":   "david_callahan",
-        "folder": "/Users/joshuawilson/Downloads/Pastor_fbx",
+        "folder": "/Users/joshuawilson/Downloads/Pastor.fbx",
     },
     {
         "name":   "isabel_callahan",
