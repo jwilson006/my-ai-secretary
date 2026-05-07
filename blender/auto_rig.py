@@ -231,7 +231,7 @@ def rig_character(meshes, character_name):
     bpy.ops.object.armature_human_metarig_add()
     metarig = bpy.context.active_object
     metarig.name = f"{character_name}_metarig"
-    metarig.display_type = "STICK"
+    metarig.display_type = "WIRE"
 
     # Scale metarig to match character height
     # Default Rigify metarig is 2.013m
