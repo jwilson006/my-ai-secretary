@@ -1,0 +1,19 @@
+{
+  "id": "david_callahan",
+  "current_location": "callahan_house",
+  "current_room": "master_bedroom",
+  "current_activity": "sleeping",
+  "mood": "rested",
+  "energy": 88,
+  "assigned_tasks": [],
+  "completed_tasks": [],
+  "recent_thought": "",
+  "last_dialogue": "",
+  "interacting_with": null,
+  "finances": {
+    "monthly_income": 7916,
+    "monthly_expenses": 5200,
+    "savings": 38000,
+    "checking": 9500
+  }
+}

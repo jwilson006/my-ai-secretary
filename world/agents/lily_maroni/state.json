@@ -1,0 +1,19 @@
+{
+  "id": "lily_maroni",
+  "current_location": "maroni_house",
+  "current_room": "master_bedroom",
+  "current_activity": "sleeping",
+  "mood": "peaceful",
+  "energy": 90,
+  "assigned_tasks": [],
+  "completed_tasks": [],
+  "recent_thought": "",
+  "last_dialogue": "",
+  "interacting_with": null,
+  "finances": {
+    "monthly_income": 2200,
+    "monthly_expenses": 800,
+    "savings": 4500,
+    "checking": 3100
+  }
+}

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cedarbrook</title>
+  <style>
+    :root {
+      --bg: #0e0e12;
+      --surface: #16161e;
+      --surface2: #1e1e2a;
+      --border: #2a2a3a;
+      --accent: #7c6af7;
+      --accent2: #f7836a;
+      --green: #4ade80;
+      --red: #f87171;
+      --text: #e2e2ee;
+      --muted: #7a7a9a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* TOP BAR */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar h1 { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--accent); }
+    .world-time { font-size: 13px; color: var(--muted); }
+    .controls { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all 0.2s;
+    }
+    .btn-start { background: var(--green); color: #000; }
+    .btn-stop  { background: var(--red); color: #fff; }
+    .btn-reset { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-dot.running { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.5s infinite; }
+    .status-dot.stopped { background: var(--muted); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* MAIN LAYOUT */
+    .layout { display: grid; grid-template-columns: 1fr 320px; gap: 0; height: calc(100vh - 57px); }
+
+    /* CHARACTER GRID */
+    .main-panel { padding: 24px; overflow-y: auto; }
+    .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+    .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px; }
+
+    .agent-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; transition: border-color 0.2s;
+    }
+    .agent-card:hover { border-color: var(--accent); }
+    .agent-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .agent-avatar {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0; overflow: hidden;
+    }
+    .agent-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .agent-name { font-size: 15px; font-weight: 700; }
+    .agent-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .agent-location { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+    .agent-status { margin-bottom: 12px; }
+    .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .status-label { font-size: 11px; color: var(--muted); width: 56px; flex-shrink: 0; }
+    .status-value { font-size: 12px; color: var(--text); }
+    .energy-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .energy-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
+
+    .thought-box {
+      background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+      font-size: 12px; color: var(--muted); line-height: 1.5; min-height: 44px;
+      margin-bottom: 10px; font-style: italic;
+    }
+    .dialogue-box {
+      border-left: 3px solid var(--accent2); padding-left: 10px;
+      font-size: 12px; color: var(--text); line-height: 1.5;
+      margin-bottom: 12px; min-height: 20px;
+    }
+
+    .finances { display: flex; gap: 8px; flex-wrap: wrap; }
+    .fin-chip {
+      background: var(--surface2); border-radius: 6px; padding: 4px 10px;
+      font-size: 11px; color: var(--muted);
+    }
+    .fin-chip span { color: var(--text); font-weight: 600; }
+
+    .tasks-section { margin-top: 12px; }
+    .task-tag {
+      display: inline-block; background: rgba(124,106,247,0.15); border: 1px solid rgba(124,106,247,0.3);
+      color: var(--accent); border-radius: 20px; padding: 3px 10px; font-size: 11px; margin: 3px 3px 3px 0;
+    }
+
+    /* SIDEBAR */
+    .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+    .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab-btn {
+      flex: 1; padding: 14px; font-size: 12px; font-weight: 600; text-align: center;
+      cursor: pointer; color: var(--muted); border: none; background: none;
+      transition: color 0.2s; border-bottom: 2px solid transparent;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; flex: 1; overflow-y: auto; padding: 20px; }
+    .tab-panel.active { display: block; }
+
+    /* TASK ASSIGNMENT */
+    .task-form { margin-bottom: 24px; }
+    .form-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .form-select, .form-input {
+      width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px; margin-bottom: 12px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .form-select:focus, .form-input:focus { border-color: var(--accent); }
+    .form-input { font-family: inherit; }
+    .form-textarea {
+      width: 100%; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px; margin-bottom: 12px;
+      outline: none; resize: vertical; min-height: 80px; font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .form-textarea:focus { border-color: var(--accent); }
+    .btn-assign {
+      width: 100%; padding: 10px; background: var(--accent); color: white;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-assign:hover { opacity: 0.9; }
+    .assign-confirm { font-size: 12px; color: var(--green); text-align: center; margin-top: 8px; display: none; }
+
+    /* ACTIVITY FEED */
+    .feed-item {
+      border-bottom: 1px solid var(--border); padding: 12px 0;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-meta { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .feed-agent { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+    .feed-time { font-size: 11px; color: var(--muted); }
+    .feed-activity { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .feed-thought { font-size: 12px; color: var(--muted); font-style: italic; line-height: 1.4; }
+    .feed-dialogue { font-size: 12px; color: var(--accent2); margin-top: 4px; }
+    .feed-error { font-size: 12px; color: var(--red); }
+
+    /* EMPTY STATES */
+    .empty { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 0; }
+
+    option { background: var(--surface2); }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>CEDARBROOK</h1>
+    <div class="world-time" id="worldTime">Loading...</div>
+  </div>
+  <div class="controls">
+    <span id="statusIndicator"><span class="status-dot stopped" id="statusDot"></span><span id="statusText">Stopped</span></span>
+    <button class="btn btn-start" onclick="startSim()">▶ Start</button>
+    <button class="btn btn-stop"  onclick="stopSim()">■ Stop</button>
+    <button class="btn btn-reset" onclick="resetSim()">↺ Reset</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="main-panel">
+    <div class="section-title">Characters</div>
+    <div class="agent-grid" id="agentGrid">
+      <div class="empty">Loading characters...</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <button class="tab-btn active" onclick="switchTab('tasks')">Assign Task</button>
+      <button class="tab-btn" onclick="switchTab('feed')">Activity Feed</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-tasks">
+      <div class="task-form">
+        <label class="form-label">Character</label>
+        <select class="form-select" id="taskAgent">
+          <option value="erin_maroni">Erin Maroni</option>
+          <option value="lily_maroni">Lily Maroni</option>
+          <option value="david_callahan">Pastor David Callahan</option>
+          <option value="isabel_callahan">Isabel Callahan</option>
+        </select>
+        <label class="form-label">Task</label>
+        <textarea class="form-textarea" id="taskText" placeholder="Describe what you want them to do..."></textarea>
+        <button class="btn-assign" onclick="assignTask()">Assign Task</button>
+        <div class="assign-confirm" id="assignConfirm">Task assigned.</div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-feed">
+      <div id="feedList"><div class="empty">No activity yet. Start the simulation.</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const AGENT_NAMES = {
+    erin_maroni:     { label: "Erin Maroni",            role: "Founder & CEO, Maroni Fashion Group", emoji: "👩‍💼" },
+    lily_maroni:     { label: "Lily Maroni",             role: "Homemaker & Blogger",                 emoji: "🏠" },
+    david_callahan:  { label: "Pastor David Callahan",  role: "Senior Pastor, Cornerstone Church",   emoji: "⛪" },
+    isabel_callahan: { label: "Isabel Callahan",         role: "First Lady & Outreach Director",      emoji: "💛" }
+  };
+
+  const LOCATION_LABELS = {
+    maroni_house:      "Maroni Residence",
+    callahan_house:    "Callahan Residence",
+    cornerstone_church:"Cornerstone Church",
+    maroni_fashion_hq: "Maroni Fashion HQ"
+  };
+
+  function fmt(n) {
+    return n == null ? "—" : "$" + Number(n).toLocaleString();
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll(".tab-btn").forEach((b, i) => {
+      b.classList.toggle("active", (i === 0 && name === "tasks") || (i === 1 && name === "feed"));
+    });
+    document.getElementById("tab-tasks").classList.toggle("active", name === "tasks");
+    document.getElementById("tab-feed").classList.toggle("active",  name === "feed");
+  }
+
+  async function startSim() {
+    await fetch("/api/start", { method: "POST" });
+    refreshWorld();
+  }
+
+  async function stopSim() {
+    await fetch("/api/stop", { method: "POST" });
+    refreshWorld();
+  }
+
+  async function resetSim() {
+    if (!confirm("Reset the world clock to Day 1, Hour 0?")) return;
+    await fetch("/api/reset", { method: "POST" });
+    refreshWorld();
+  }
+
+  async function assignTask() {
+    const agent_id = document.getElementById("taskAgent").value;
+    const task     = document.getElementById("taskText").value.trim();
+    if (!task) return;
+
+    await fetch("/api/task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agent_id, task })
+    });
+
+    document.getElementById("taskText").value = "";
+    const confirm = document.getElementById("assignConfirm");
+    confirm.style.display = "block";
+    setTimeout(() => confirm.style.display = "none", 2500);
+    refreshAgents();
+  }
+
+  async function refreshWorld() {
+    try {
+      const res  = await fetch("/api/world");
+      const data = await res.json();
+      document.getElementById("worldTime").textContent = data.time_label;
+      const running = data.running;
+      document.getElementById("statusDot").className  = "status-dot " + (running ? "running" : "stopped");
+      document.getElementById("statusText").textContent = running ? "Running" : "Stopped";
+    } catch(e) {}
+  }
+
+  async function refreshAgents() {
+    try {
+      const res  = await fetch("/api/agents");
+      const data = await res.json();
+      const grid = document.getElementById("agentGrid");
+      grid.innerHTML = "";
+
+      for (const [id, agent] of Object.entries(data)) {
+        const meta  = AGENT_NAMES[id] || { label: id, role: "", emoji: "👤" };
+        const loc   = LOCATION_LABELS[agent.current_location] || agent.current_location || "—";
+        const room  = agent.current_room ? ` / ${agent.current_room.replace(/_/g," ")}` : "";
+        const tasks = (agent.assigned_tasks || []);
+        const energy = agent.energy ?? 100;
+        const fin  = agent.finances || {};
+
+        const card = document.createElement("div");
+        card.className = "agent-card";
+        card.innerHTML = `
+          <div class="agent-header">
+            <div class="agent-avatar">${meta.emoji}</div>
+            <div>
+              <div class="agent-name">${meta.label}</div>
+              <div class="agent-role">${meta.role}</div>
+              <div class="agent-location">📍 ${loc}${room}</div>
+            </div>
+          </div>
+
+          <div class="agent-status">
+            <div class="status-row">
+              <span class="status-label">Doing</span>
+              <span class="status-value">${agent.current_activity || "—"}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Mood</span>
+              <span class="status-value">${agent.mood || "—"}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Energy</span>
+              <div class="energy-bar"><div class="energy-fill" style="width:${energy}%"></div></div>
+              <span class="status-value" style="margin-left:8px">${energy}</span>
+            </div>
+          </div>
+
+          ${agent.recent_thought ? `<div class="thought-box">"${agent.recent_thought}"</div>` : ""}
+          ${agent.last_dialogue  ? `<div class="dialogue-box">💬 ${agent.last_dialogue}</div>` : ""}
+
+          <div class="finances">
+            <div class="fin-chip">Income <span>${fmt(fin.monthly_income)}/mo</span></div>
+            <div class="fin-chip">Savings <span>${fmt(fin.savings)}</span></div>
+            <div class="fin-chip">Checking <span>${fmt(fin.checking)}</span></div>
+          </div>
+
+          ${tasks.length ? `
+            <div class="tasks-section">
+              ${tasks.map(t => `<span class="task-tag">📌 ${t}</span>`).join("")}
+            </div>` : ""}
+        `;
+        grid.appendChild(card);
+      }
+    } catch(e) {
+      document.getElementById("agentGrid").innerHTML = `<div class="empty">Could not load characters.</div>`;
+    }
+  }
+
+  async function refreshFeed() {
+    try {
+      const res  = await fetch("/api/feed");
+      const feed = await res.json();
+      const list = document.getElementById("feedList");
+
+      if (!feed.length) {
+        list.innerHTML = `<div class="empty">No activity yet. Start the simulation.</div>`;
+        return;
+      }
+
+      list.innerHTML = feed.map(item => {
+        if (item.error) return `
+          <div class="feed-item">
+            <div class="feed-meta">
+              <span class="feed-agent">${item.agent}</span>
+              <span class="feed-time">${item.time_label || ""}</span>
+            </div>
+            <div class="feed-error">⚠ ${item.error}</div>
+          </div>`;
+
+        return `
+          <div class="feed-item">
+            <div class="feed-meta">
+              <span class="feed-agent">${(AGENT_NAMES[item.agent] || {}).label || item.agent}</span>
+              <span class="feed-time">${item.time_label || ""}</span>
+            </div>
+            <div class="feed-activity">${item.activity || ""}</div>
+            ${item.thought   ? `<div class="feed-thought">"${item.thought}"</div>` : ""}
+            ${item.dialogue  ? `<div class="feed-dialogue">💬 "${item.dialogue}"</div>` : ""}
+            ${item.action    ? `<div class="feed-thought">⚡ ${item.action}</div>` : ""}
+          </div>`;
+      }).join("");
+    } catch(e) {}
+  }
+
+  // Poll every 5 seconds
+  function poll() {
+    refreshWorld();
+    refreshAgents();
+    refreshFeed();
+  }
+
+  poll();
+  setInterval(poll, 5000);
+</script>
+</body>
+</html>

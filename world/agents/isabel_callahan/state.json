@@ -1,0 +1,19 @@
+{
+  "id": "isabel_callahan",
+  "current_location": "callahan_house",
+  "current_room": "master_bedroom",
+  "current_activity": "sleeping",
+  "mood": "peaceful",
+  "energy": 88,
+  "assigned_tasks": [],
+  "completed_tasks": [],
+  "recent_thought": "",
+  "last_dialogue": "",
+  "interacting_with": null,
+  "finances": {
+    "monthly_income": 2333,
+    "monthly_expenses": 1800,
+    "savings": 12000,
+    "checking": 5400
+  }
+}

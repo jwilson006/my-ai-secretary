@@ -1,0 +1,3 @@
+# No external dependencies — uses Python stdlib only.
+# The engine calls the 'claude' CLI as a subprocess (uses your Claude Code subscription).
+# Python 3.8+ required.
