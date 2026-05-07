@@ -34,22 +34,22 @@ CHARACTER_CONFIGS = [
         "name":   "erin_maroni",
         "folder": "/Users/joshuawilson/Downloads/Erin_fbx",
     },
-    # Add remaining characters when ready:
+    {
+        "name":   "david_callahan",
+        "folder": "/Users/joshuawilson/Downloads/Pastor_fbx",
+    },
+    {
+        "name":   "isabel_callahan",
+        "folder": "/Users/joshuawilson/Downloads/Pastor's wife_fbx",
+    },
+    # Add Lily once her folder path is known:
     # {
     #     "name":   "lily_maroni",
     #     "folder": "/Users/joshuawilson/Downloads/Lily_fbx",
     # },
-    # {
-    #     "name":   "david_callahan",
-    #     "folder": "/Users/joshuawilson/Downloads/David_fbx",
-    # },
-    # {
-    #     "name":   "isabel_callahan",
-    #     "folder": "/Users/joshuawilson/Downloads/Isabel_fbx",
-    # },
 ]
 
-OUTPUT_DIR = "/home/user/my-ai-secretary/models"
+OUTPUT_DIR = "/Users/joshuawilson/Downloads/cedarbrook_models"
 
 # ─── HELPERS ─────────────────────────────────────────────────────────────────
 
