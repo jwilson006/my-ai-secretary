@@ -42,11 +42,10 @@ CHARACTER_CONFIGS = [
         "name":   "isabel_callahan",
         "folder": "/Users/joshuawilson/Downloads/Pastor's wife_fbx",
     },
-    # Add Lily once her folder path is known:
-    # {
-    #     "name":   "lily_maroni",
-    #     "folder": "/Users/joshuawilson/Downloads/Lily_fbx",
-    # },
+    {
+        "name":   "lily_maroni",
+        "folder": "/Users/joshuawilson/Downloads/Lily_fbx",
+    },
 ]
 
 OUTPUT_DIR = "/Users/joshuawilson/Downloads/cedarbrook_models"
